@@ -21,9 +21,8 @@ class ResPartner(models.Model):
 
     def _message_fetch_domain(self, domain=None):
         """
-        Extend the default chatter domain so that, for company-type contacts,
-        messages from their related child contacts (e.g., employees, branches)
-        are also included in the chatter thread.
+        Extend the default chatter domain to include messages from related child contacts
+        for company-type records in the chatter thread.
         """
         base_domain = super()._message_fetch_domain(domain)
 
@@ -37,11 +36,29 @@ class ResPartner(models.Model):
         if not related_contact_ids:
             return base_domain
 
-        # Add child partner messages to the domain
+        # Combine the company's own messages with messages from child contacts
+        combined_ids = companies.ids + related_contact_ids
         related_domain = [
             ("model", "=", "res.partner"),
-            ("res_id", "in", related_contact_ids),
+            ("res_id", "in", combined_ids),
         ]
 
+        # Use OR to include both the company's messages and child messages
         return expression.OR([base_domain, related_domain])
 
+    def message_fetch(self, domain=None, limit=None, offset=0):
+        """
+        Override message_fetch to ensure messages from child_ids are included
+        and sorted correctly in the chatter.
+        """
+        if self.is_company:
+            # Fetch messages for the company and its child contacts
+            combined_ids = self.ids + self.child_ids.ids
+            extended_domain = expression.OR([
+                domain or [],
+                [("model", "=", "res.partner"), ("res_id", "in", combined_ids)]
+            ])
+            return self.env["mail.message"].search(
+                extended_domain, limit=limit, offset=offset, order="date desc"
+            )
+        return super().message_fetch(domain=domain, limit=limit, offset=offset)
