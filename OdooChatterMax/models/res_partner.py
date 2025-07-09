@@ -12,69 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 from odoo import models
 from odoo.osv import expression
+
+_logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-def _message_get_domain(self):
-    """
-    Extend the domain for mail.messages to include child contact messages
-    when viewing a company contact.
-    """
-    self.ensure_one()
-    domain = super()._message_get_domain()
-
-    if self.is_company and self.child_ids:
-        domain = expression.OR([
-            domain,
-            [('model', '=', 'res.partner'), ('res_id', 'in', self.child_ids.ids)],
-        ])
-
-    return domain
-
-    def _message_fetch_domain(self, domain=None):
+    def _message_get_domain(self):
         """
-        Extend the default chatter domain to include messages from related child contacts
-        for company-type records in the chatter thread.
+        Extend the domain for mail.messages to include chatter from related contacts
+        (child_ids) when the current partner is a company.
         """
-        base_domain = super()._message_fetch_domain(domain)
+        self.ensure_one()
+        base_domain = super()._message_get_domain()
 
-        # Only apply this logic to company-type records
-        companies = self.filtered(lambda p: p.is_company)
-        if not companies:
-            return base_domain
-
-        # Fetch all child_ids from company partners
-        related_contact_ids = companies.mapped("child_ids").ids
-        if not related_contact_ids:
-            return base_domain
-
-        # Combine the company's own messages with messages from child contacts
-        combined_ids = companies.ids + related_contact_ids
-        related_domain = [
-            ("model", "=", "res.partner"),
-            ("res_id", "in", combined_ids),
-        ]
-
-        # Use OR to include both the company's messages and child messages
-        return expression.OR([base_domain, related_domain])
-
-    def message_fetch(self, domain=None, limit=None, offset=0):
-        """
-        Override message_fetch to ensure messages from child_ids are included
-        and sorted correctly in the chatter.
-        """
-        if self.is_company:
-            # Fetch messages for the company and its child contacts
-            combined_ids = self.ids + self.child_ids.ids
-            extended_domain = expression.OR([
-                domain or [],
-                [("model", "=", "res.partner"), ("res_id", "in", combined_ids)]
-            ])
-            return self.env["mail.message"].search(
-                extended_domain, limit=limit, offset=offset, order="date desc"
+        if self.is_company and self.child_ids:
+            child_ids = self.child_ids.ids
+            _logger.debug(
+                "[OdooChatterMax] Extending chatter for company partner ID %s to include child_ids: %s",
+                self.id, child_ids
             )
-        return super().message_fetch(domain=domain, limit=limit, offset=offset)
+
+            child_domain = [
+                ("model", "=", "res.partner"),
+                ("res_id", "in", child_ids),
+            ]
+
+            return expression.OR([base_domain, child_domain])
+
+        return base_domain
