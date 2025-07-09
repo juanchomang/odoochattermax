@@ -19,6 +19,22 @@ from odoo.osv import expression
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+def _message_get_domain(self):
+    """
+    Extend the domain for mail.messages to include child contact messages
+    when viewing a company contact.
+    """
+    self.ensure_one()
+    domain = super()._message_get_domain()
+
+    if self.is_company and self.child_ids:
+        domain = expression.OR([
+            domain,
+            [('model', '=', 'res.partner'), ('res_id', 'in', self.child_ids.ids)],
+        ])
+
+    return domain
+
     def _message_fetch_domain(self, domain=None):
         """
         Extend the default chatter domain to include messages from related child contacts
