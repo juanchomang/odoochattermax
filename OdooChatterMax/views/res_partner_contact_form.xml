@@ -8,26 +8,20 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
 
-                <!-- Add a new notebook page at the end -->
-                <xpath expr="//sheet/notebook" position="inside">
-                    <page name="subsidiaries" string="Subsidiaries">
-
-                        <!-- Show the list only when this record is a company -->
-                        <if condition="is_company">
-                            <field name="child_ids" mode="list" class="o_form_child_list">
-
-                                <!-- List view (not tree) of child contacts -->
-                                <list editable="bottom">
-                                    <field name="name"/>
-                                    <field name="email"/>
-                                    <field name="phone"/>
-                                </list>
-
-                            </field>
-                        </if>
-
-                    </page>
-                </xpath>
+            <xpath expr="//sheet/notebook" position="inside">
+                <page name="chattermax_debug_related_contacts" string="Related Contacts">
+                    <if condition="is_company">
+                        <field name="child_ids" mode="list" class="o_form_child_list">
+                            <list editable="bottom">
+                                <field name="id" readonly="1"/>
+                                <field name="name" readonly="1"/>
+                                <field name="email" readonly="1"/>
+                                <field name="phone" readonly="1"/>
+                            </list>
+                        </field>
+                    </if>
+                </page>
+            </xpath>
 
             </field>
         </record>
