@@ -28,6 +28,9 @@ class ResPartner(models.Model):
         (child_ids) when the current partner is a company.
         """
         self.ensure_one()
+
+        _logger.debug("[OdooChatterMax] Entered _message_get_domain() for partner ID %s", self.id)
+
         base_domain = super()._message_get_domain()
 
         if self.is_company and self.child_ids:
