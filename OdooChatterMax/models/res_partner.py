@@ -21,22 +21,27 @@ class ResPartner(models.Model):
 
     def _message_fetch_domain(self, domain=None):
         """
-        Extend the default chatter domain so that, for companies,
-        messages on all linked individuals (child contacts) are included.
+        Extend the default chatter domain so that, for company-type contacts,
+        messages from their related child contacts (e.g., employees, branches)
+        are also included in the chatter thread.
         """
         base_domain = super()._message_fetch_domain(domain)
 
-        company_partners = self.filtered(lambda p: p.company_type == "company")
-        if not company_partners:
+        # Only apply this logic to company-type records
+        companies = self.filtered(lambda p: p.is_company)
+        if not companies:
             return base_domain
 
-        child_ids = company_partners.mapped("child_ids").ids
-        if not child_ids:
+        # Fetch all child_ids from company partners
+        related_contact_ids = companies.mapped("child_ids").ids
+        if not related_contact_ids:
             return base_domain
 
-        child_domain = [
+        # Add child partner messages to the domain
+        related_domain = [
             ("model", "=", "res.partner"),
-            ("res_id", "in", child_ids),
+            ("res_id", "in", related_contact_ids),
         ]
 
-        return expression.OR([base_domain, child_domain])
+        return expression.OR([base_domain, related_domain])
+
