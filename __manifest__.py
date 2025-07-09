@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0 (see NOTICE).
 
 {
-    "name": "ChatterMax for Odoo 18",
+    "name": "ChatterMax",
     "version": "18.0.1.0.3",
     "author": "Juan Herrera de la Fuente",
     "license": "Other OSI approved licence",
