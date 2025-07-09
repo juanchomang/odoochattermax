@@ -2,10 +2,10 @@
 # Licensed under the Apache License, Version 2.0 (see NOTICE).
 
 {
-    "name": "Juanchomang ChatterMax",
+    "name": "ChatterMax for Odoo 18",
     "version": "18.0.1.0.3",
-    "author": "Juanchomang",
-    "license": "Apache-2.0",
+    "author": "Juan Herrera de la Fuente",
+    "license": "Other OSI approved licence",
     "category": "Communication",
     "summary": "Shows chatter for companies and all their linked individuals in one unified view.",
     "depends": ["mail", "contacts"],
