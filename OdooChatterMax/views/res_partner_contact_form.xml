@@ -1,0 +1,36 @@
+<odoo>
+    <data>
+
+        <!-- Inherit the standard Contact form -->
+        <record id="view_partner_form_inherit_child_ids" model="ir.ui.view">
+            <field name="name">res.partner.form.child_ids</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Add a new notebook page at the end -->
+                <xpath expr="//sheet/notebook" position="inside">
+                    <page name="subsidiaries" string="Subsidiaries">
+
+                        <!-- Show the list only when this record is a company -->
+                        <if condition="is_company">
+                            <field name="child_ids" mode="list" class="o_form_child_list">
+
+                                <!-- List view (not tree) of child contacts -->
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                </list>
+
+                            </field>
+                        </if>
+
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>
