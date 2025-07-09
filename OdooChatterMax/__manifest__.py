@@ -10,7 +10,7 @@
     "summary": "Shows chatter for companies and all their linked individuals in one unified view.",
     "depends": ["base", "mail", "contacts", "web_studio"],
     'data': [
-        'views/res_partner_child_ids.xml',
+        'views/res_partner_contact_form.xml',
     ],
     "installable": True,
     "application": False,
