@@ -20,6 +20,7 @@ from odoo.osv import expression
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    @staticmethod
     def log_debug_message(env, message, level='info', name='OdooChatterMax', path='custom.debug', func='log_debug', line=0, dbname=None, commit=True):
         """Logs a message to ir.logging and optionally commits the transaction."""
         try:
