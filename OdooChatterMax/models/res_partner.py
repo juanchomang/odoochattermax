@@ -24,12 +24,12 @@ class ResPartner(models.Model):
 
         self.ensure_one()
 
-        self.env['ir.logging'].create({
+        env['ir.logging'].create({
             'name': 'OdooChatterMax',
             'type': 'server',
             'dbname': self.env.cr.dbname,
             'level': 'info',
-            'message': f"Entered _message_get_domain() for partner ID {self.id}",
+            'message': f"Entered _message_get_domain()",
             'path': 'res.partner',
             'func': '_message_get_domain',
             'line': 0,
@@ -43,12 +43,12 @@ class ResPartner(models.Model):
         if self.is_company and self.child_ids:
             child_ids = self.child_ids.ids
 
-            self.env['ir.logging'].create({
+            env['ir.logging'].create({
                 'name': 'OdooChatterMax',
                 'type': 'server',
                 'dbname': self.env.cr.dbname,
                 'level': 'info',
-                'message': f"Extending chatter for company partner ID {self.id} to include child_ids: {child_ids}",
+                'message': f"Extending chatter for company partner ID",
                 'path': 'res.partner',
                 'func': '_message_get_domain',
                 'line': 0,
