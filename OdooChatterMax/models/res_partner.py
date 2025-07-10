@@ -21,10 +21,8 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     def _message_get_domain(self):
-        """
-        Extend the domain for mail.messages to include chatter from related contacts
-        (child_ids) when the current partner is a company.
-        """
+        raise UserError(f"Entered _message_get_domain for partner ID {self.id}")
+
         self.ensure_one()
 
         self.env['ir.logging'].create({
