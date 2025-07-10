@@ -15,29 +15,11 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
+from OdooChatterMax.utils.logging import log_debug_message
 
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
-
-    @staticmethod
-    def log_debug_message(env, message, level='info', name='OdooChatterMax', path='custom.debug', func='log_debug', line=0, dbname=None, commit=True):
-        """Logs a message to ir.logging and optionally commits the transaction."""
-        try:
-            env['ir.logging'].sudo().create({
-                'name': name,
-                'type': 'server',
-                'dbname': dbname or env.cr.dbname,
-                'level': level,
-                'message': message,
-                'path': path,
-                'func': func,
-                'line': line,
-            })
-            if commit:
-                env.cr.commit()
-        except Exception as e:
-            print(f"[LogError] Failed to log message: {e}")
 
     def _message_get_domain(self):
 
