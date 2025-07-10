@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-
-_logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
@@ -30,16 +27,32 @@ class ResPartner(models.Model):
         """
         self.ensure_one()
 
-        _logger.debug("[OdooChatterMax] Entered _message_get_domain() for partner ID %s", self.id)
+        self.env['ir.logging'].create({
+            'name': 'OdooChatterMax',
+            'type': 'server',
+            'dbname': self.env.cr.dbname,
+            'level': 'info',
+            'message': f"Entered _message_get_domain() for partner ID {self.id}",
+            'path': 'res.partner',
+            'func': '_message_get_domain',
+            'line': 0,
+        })
 
         base_domain = super()._message_get_domain()
 
         if self.is_company and self.child_ids:
             child_ids = self.child_ids.ids
-            _logger.debug(
-                "[OdooChatterMax] Extending chatter for company partner ID %s to include child_ids: %s",
-                self.id, child_ids
-            )
+
+            self.env['ir.logging'].create({
+                'name': 'OdooChatterMax',
+                'type': 'server',
+                'dbname': self.env.cr.dbname,
+                'level': 'info',
+                'message': f"Extending chatter for company partner ID {self.id} to include child_ids: {child_ids}",
+                'path': 'res.partner',
+                'func': '_message_get_domain',
+                'line': 0,
+            })
 
             child_domain = [
                 ("model", "=", "res.partner"),
