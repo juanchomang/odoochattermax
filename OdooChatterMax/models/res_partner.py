@@ -21,7 +21,6 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     def _message_get_domain(self):
-        raise UserError(f"Entered _message_get_domain for partner ID {self.id}")
 
         self.ensure_one()
 
@@ -35,6 +34,9 @@ class ResPartner(models.Model):
             'func': '_message_get_domain',
             'line': 0,
         })
+
+        raise UserError(f"Entered _message_get_domain for partner ID {self.env}")
+
 
         base_domain = super()._message_get_domain()
 
