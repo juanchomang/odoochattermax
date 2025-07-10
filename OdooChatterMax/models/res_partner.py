@@ -20,39 +20,38 @@ from odoo.osv import expression
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    def log_debug_message(env, message, level='info', name='OdooChatterMax', path='custom.debug', func='log_debug', line=0, dbname=None, commit=True):
+        """Logs a message to ir.logging and optionally commits the transaction."""
+        try:
+            env['ir.logging'].sudo().create({
+                'name': name,
+                'type': 'server',
+                'dbname': dbname or env.cr.dbname,
+                'level': level,
+                'message': message,
+                'path': path,
+                'func': func,
+                'line': line,
+            })
+            if commit:
+                env.cr.commit()
+        except Exception as e:
+            print(f"[LogError] Failed to log message: {e}")
+
     def _message_get_domain(self):
 
         self.ensure_one()
 
-        env['ir.logging'].create({
-            'name': 'OdooChatterMax',
-            'type': 'server',
-            'dbname': self.env.cr.dbname,
-            'level': 'info',
-            'message': f"Entered _message_get_domain()",
-            'path': 'res.partner',
-            'func': '_message_get_domain',
-            'line': 0,
-        })
+        log_debug_message(env, "Reached stage 2 logic for ticket #123")
 
         raise UserError(f"Entered _message_get_domain for partner ID {self.env}")
-
 
         base_domain = super()._message_get_domain()
 
         if self.is_company and self.child_ids:
             child_ids = self.child_ids.ids
 
-            env['ir.logging'].create({
-                'name': 'OdooChatterMax',
-                'type': 'server',
-                'dbname': self.env.cr.dbname,
-                'level': 'info',
-                'message': f"Extending chatter for company partner ID",
-                'path': 'res.partner',
-                'func': '_message_get_domain',
-                'line': 0,
-            })
+            log_debug_message(env, "Reached stage 2 logic for ticket #123")
 
             child_domain = [
                 ("model", "=", "res.partner"),
