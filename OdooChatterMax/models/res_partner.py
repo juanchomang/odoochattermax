@@ -63,6 +63,7 @@ class ResPartner(models.Model):
         string='Messages',
         compute='_compute_message_ids',
         store=False,  # keep it transient
+        recursive=True,
         domain="[('model', '=', 'res.partner')]"
     )
 
