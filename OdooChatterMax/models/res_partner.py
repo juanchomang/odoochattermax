@@ -36,7 +36,11 @@ odoo-bin shell
 
 partner = env['res.partner'].search([('is_company', '=', True)], limit=1)
 domain = partner._message_fetch_domain()
+env['mail.message'].search(domain).mapped('body')
+
 env['mail.message'].search(domain).mapped('subject')
+[(m.model, m.res_id, m.subject) for m in env['mail.message'].search(domain)]
+
 
 """
 
@@ -52,6 +56,28 @@ from ..utils.logging import log_debug_message
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
+
+    message_ids = fields.One2many(
+        comodel_name='mail.message',
+        inverse_name='res_id',
+        string='Messages',
+        compute='_compute_message_ids',
+        store=False,  # keep it transient
+        domain="[('model', '=', 'res.partner')]"
+    )
+
+    @api.depends('child_ids.message_ids')
+    def _compute_message_ids(self):
+        for partner in self:
+            if partner.is_company:
+                child_ids = partner.child_ids.ids
+                domain = [('model', '=', 'res.partner'), ('res_id', 'in', child_ids + [partner.id])]
+                partner.message_ids = self.env['mail.message'].search(domain)
+            else:
+                partner.message_ids = self.env['mail.message'].search([
+                    ('model', '=', 'res.partner'),
+                    ('res_id', '=', partner.id)
+                ])    
 
     def _message_fetch_domain(self, domain=None):
         self.ensure_one()
