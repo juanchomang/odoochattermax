@@ -69,28 +69,28 @@ from ..utils.logging import log_debug_message
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    #message_ids = fields.One2many(
-    #    comodel_name='mail.message',
-    #    inverse_name='res_id',
-    #    string='Messages',
-    #    compute='_compute_message_ids',
-    #    store=False,  # keep it transient
-    #    recursive=True,
-    #    domain="[('model', '=', 'res.partner')]"
-    #)
     message_ids = fields.One2many(
-        'mail.message', 'res_id',
+        comodel_name='mail.message',
+        inverse_name='res_id',
         string='Messages',
-        compute='_compute_custom_message_ids',
-        store=False,
-        help="Messages and communication history",
+        compute='_compute_message_ids',
+        store=False,  # keep it transient
+        recursive=True,
+        domain="[('model', '=', 'res.partner')]"
     )
+    # message_ids = fields.One2many(
+    #    'mail.message', 'res_id',
+    #    string='Messages',
+    #    compute='_compute_custom_message_ids',
+    #    store=False,
+    #    help="Messages and communication history",
+    #)
 
-    @api.depends()
-    def _compute_custom_message_ids(self):
-        for record in self:
-            domain = record._message_fetch_domain()
-            record.message_ids = self.env['mail.message'].search(domain)
+    #@api.depends()
+    #def _compute_custom_message_ids(self):
+    #    for record in self:
+    #        domain = record._message_fetch_domain()
+    #        record.message_ids = self.env['mail.message'].search(domain)
 
     has_message = fields.Boolean(
         string='Has Message',
@@ -99,11 +99,11 @@ class ResPartner(models.Model):
         recursive=True,  # Resolves the warning you saw earlier
     )
 
-    #@api.depends('message_ids')  # You could add more deps as needed
-    #def _compute_has_message(self):
-    #    for partner in self:
-    #        message_domain = partner._message_fetch_domain()
-    #        partner.has_message = bool(self.env['mail.message'].search_count(message_domain))
+    @api.depends('message_ids')  # You could add more deps as needed
+    def _compute_has_message(self):
+        for partner in self:
+            message_domain = partner._message_fetch_domain()
+            partner.has_message = bool(self.env['mail.message'].search_count(message_domain))
 
     @api.depends('child_ids.message_ids')
     def _compute_message_ids(self):
