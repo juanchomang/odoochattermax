@@ -45,6 +45,8 @@ from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 # from odoo.addons.mail.models.mail_thread import MailThread
 # from odoo.addons.mail.models.mail_thread import MailThread
+from odoo.addons.mail.models.mail_thread import MailThread
+
 # from odoo.addons.mail.models.mail_thread import MailThreadMixin
 from ..utils.logging import log_debug_message
 
@@ -62,13 +64,15 @@ class ResPartner(models.Model):
         )
 
         # Walk MRO to get the *next* method (i.e. skip ResPartner)
-        for base in type(self).__mro__[1:]:
-            method = base.__dict__.get('_message_fetch_domain')
-            if method:
-                base_domain = method(self, domain)
-                break
-        else:
-            raise AttributeError("_message_fetch_domain not found in MRO")
+        # for base in type(self).__mro__[1:]:
+        #     method = base.__dict__.get('_message_fetch_domain')
+        #     if method:
+        #         base_domain = method(self, domain)
+        #         break
+        # else:
+        #     raise AttributeError("_message_fetch_domain not found in MRO")
+
+        base_domain = MailThread.__dict__['_message_fetch_domain'](self, domain)
 
         if self.is_company and self.child_ids:
             base_domain = ['|'] + base_domain + [('res_id', 'in', self.child_ids.ids)]
