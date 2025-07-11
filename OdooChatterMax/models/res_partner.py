@@ -61,8 +61,14 @@ class ResPartner(models.Model):
             func='_message_fetch_domain',
         )
 
-        # Call the first ancestor's implementation
-        base_domain = super(ResPartner, self)._message_fetch_domain(domain)
+        # Walk MRO to get the *next* method (i.e. skip ResPartner)
+        for base in type(self).__mro__[1:]:
+            method = base.__dict__.get('_message_fetch_domain')
+            if method:
+                base_domain = method(self, domain)
+                break
+        else:
+            raise AttributeError("_message_fetch_domain not found in MRO")
 
         if self.is_company and self.child_ids:
             base_domain = ['|'] + base_domain + [('res_id', 'in', self.child_ids.ids)]
