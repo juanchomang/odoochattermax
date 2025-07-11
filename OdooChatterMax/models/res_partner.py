@@ -23,12 +23,23 @@ TEST 2
 ======
 domain = partner._message_fetch_domain()
 env['mail.message'].search(domain).mapped('body')
+
+
+
+
+<sheet>
+    ...
+    <div class="oe_chatter">
+        <field name="message_ids" widget="mail_thread"/>
+    </div>
+</sheet>
+
+
 """
 
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
-# from odoo.addons.mail.models.mail_thread import MailThread
 # from odoo.addons.mail.models.mail_thread import MailThread
 from odoo.addons.mail.models.mail_thread import MailThread
 
@@ -36,7 +47,9 @@ from odoo.addons.mail.models.mail_thread import MailThread
 from ..utils.logging import log_debug_message
 
 class ResPartner(models.Model):
-    _inherit = 'res.partner'
+    # _inherit = 'res.partner'
+    _inherit = ['res.partner', 'mail.thread']
+
 
     message_ids = fields.One2many(
         comodel_name='mail.message',
@@ -86,6 +99,12 @@ class ResPartner(models.Model):
                     ('model', '=', 'res.partner'),
                     ('res_id', '=', partner.id)
                 ])    
+
+
+    def message_fetch(self, domain=None, limit=None):
+        log_debug_message(self.env, f"message_fetch called on partner {self.id}", path='res.partner', func='message_fetch')
+        return super().message_fetch(domain=domain, limit=limit)
+
 
     def _message_fetch_domain(self, domain=None):
         self.ensure_one()
