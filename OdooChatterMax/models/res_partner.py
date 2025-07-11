@@ -43,7 +43,8 @@ env['mail.message'].search(domain).mapped('subject')
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
-from odoo.addons.mail.models.mail_thread import MailThread
+# from odoo.addons.mail.models.mail_thread import MailThread
+from odoo.addons.mail.models.mail_thread import MailThreadMixin
 from ..utils.logging import log_debug_message
 
 class ResPartner(models.Model):
@@ -60,7 +61,7 @@ class ResPartner(models.Model):
         )
 
         # Call the base method explicitly to avoid recursion
-        base_domain = MailThread._message_fetch_domain(self, domain)
+        base_domain = MailThreadMixin._message_fetch_domain(self, domain)
 
         if self.is_company and self.child_ids:
             child_ids = self.child_ids.ids
