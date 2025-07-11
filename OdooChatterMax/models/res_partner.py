@@ -41,14 +41,14 @@ from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 # from odoo.addons.mail.models.mail_thread import MailThread
-from odoo.addons.mail.models.mail_thread import MailThread
+# from odoo.addons.mail.models.mail_thread import MailThread
 
 # from odoo.addons.mail.models.mail_thread import MailThreadMixin
 from ..utils.logging import log_debug_message
 
 class ResPartner(models.Model):
-    # _inherit = 'res.partner'
-    _inherit = ['res.partner', 'mail.thread']
+    _inherit = 'res.partner'
+    # _inherit = ['res.partner', 'mail.thread']
 
 
     message_ids = fields.One2many(
