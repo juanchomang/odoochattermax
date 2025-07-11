@@ -51,15 +51,16 @@ class ResPartner(models.Model):
     # _inherit = ['res.partner', 'mail.thread']
 
 
-    message_ids = fields.One2many(
-        comodel_name='mail.message',
-        inverse_name='res_id',
-        string='Messages',
-        compute='_compute_message_ids',
-        store=False,  # keep it transient
-        recursive=True,
-        domain="[('model', '=', 'res.partner')]"
-    )
+    # message_ids = fields.One2many(
+    #    comodel_name='mail.message',
+    #    inverse_name='res_id',
+    #    string='Messages',
+    #    compute='_compute_message_ids',
+    #    store=False,  # keep it transient
+    #    recursive=True,
+    #    domain="[('model', '=', 'res.partner')]"
+    #)
+
     # message_ids = fields.One2many(
     #    'mail.message', 'res_id',
     #    string='Messages',
