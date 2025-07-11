@@ -12,48 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-FAILED
+odoo-bin shell
+
+TEST 1
 ======
-odoo-bin shell
-partner = env['res.partner'].search([('is_company', '=', True)], limit=1)
-domain = partner._message_get_domain()
-
-TESTING
-=======
-odoo-bin shell
-
-partner = env['res.partner'].search([('is_company', '=', True)], limit=1)
-domain = partner._message_fetch_domain()
-
-
-sorted(set(dir(env['res.partner'])))
-
-sorted(set(dir(env['odoo.addons.mail.models.mail_thread'])))
-
-MORE TESTING
-============
-odoo-bin shell
-
-partner = env['res.partner'].search([('is_company', '=', True)], limit=1)
-domain = partner._message_fetch_domain()
-env['mail.message'].search(domain).mapped('body')
-
-env['mail.message'].search(domain).mapped('subject')
-[(m.model, m.res_id, m.subject) for m in env['mail.message'].search(domain)]
-
-
-AND MORE TESTING
-================
-odoo-bin shell
-
 partner = env['res.partner'].search([('id', '=', 15)], limit=1)
 partner.has_message
 
-TEST2
+TEST 2
+======
 domain = partner._message_fetch_domain()
 env['mail.message'].search(domain).mapped('body')
-
-
 """
 
 from odoo import api, fields, models, _
@@ -133,51 +102,3 @@ class ResPartner(models.Model):
             domain or [],
             [('model', '=', self._name), ('res_id', 'in', partner_ids)]
         ])
-
-        # Walk MRO to get the *next* method (i.e. skip ResPartner)
-        # for base in type(self).__mro__[1:]:
-        #     method = base.__dict__.get('_message_fetch_domain')
-        #     if method:
-        #         base_domain = method(self, domain)
-        #         break
-        # else:
-        #     raise AttributeError("_message_fetch_domain not found in MRO")
-
-
-"""
-class ResPartner(models.Model):
-    _inherit = "res.partner"
-
-    def _message_fetch_domain(self, domain=None):
-        self.ensure_one()
-
-        log_debug_message(
-            self.env,
-            message=f"[OdooChatterMax] _message_fetch_domain triggered for partner ID {self.id}",
-            path='res.partner',
-            func='_message_fetch_domain',
-        )
-
-        # Call the base method explicitly to avoid recursion
-        # base_domain = MailThreadMixin._message_fetch_domain(self, domain)
-        # base_domain = MailThread._message_fetch_domain(self, domain)
-
-
-        if self.is_company and self.child_ids:
-            child_ids = self.child_ids.ids
-
-            log_debug_message(
-                self.env,
-                message=f"[OdooChatterMax] Adding children {child_ids} to domain",
-                path='res.partner',
-                func='_message_fetch_domain',
-            )
-
-            child_domain = [
-                ("model", "=", "res.partner"),
-                ("res_id", "in", child_ids),
-            ]
-            return expression.OR([base_domain, child_domain])
-
-        return base_domain
-"""
