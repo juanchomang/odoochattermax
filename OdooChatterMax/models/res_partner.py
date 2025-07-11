@@ -17,29 +17,33 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from ..utils.logging import log_debug_message
 
-class ResPartner(models.Model):
-    _inherit = "res.partner"
+def _message_get_domain(self):
+    self.ensure_one()
 
-    def _message_get_domain(self):
+    log_debug_message(
+        self.env,
+        f"Entered _message_get_domain for partner ID {self.id}",
+        path='res.partner',
+        func='_message_get_domain'
+    )
 
-        self.ensure_one()
+    base_domain = super()._message_get_domain()
 
-        log_debug_message(self.env, "Reached stage 2 logic for ticket #123")
+    if self.is_company and self.child_ids:
+        child_ids = self.child_ids.ids
 
-        raise UserError(f"Entered _message_get_domain for partner ID {self.env}")
+        log_debug_message(
+            self.env,
+            f"Including child_ids in domain for partner {self.id}: {child_ids}",
+            path='res.partner',
+            func='_message_get_domain'
+        )
 
-        base_domain = super()._message_get_domain()
+        child_domain = [
+            ("model", "=", "res.partner"),
+            ("res_id", "in", child_ids),
+        ]
 
-        if self.is_company and self.child_ids:
-            child_ids = self.child_ids.ids
+        return expression.OR([base_domain, child_domain])
 
-            log_debug_message(env, "Reached stage 2 logic for ticket #123")
-
-            child_domain = [
-                ("model", "=", "res.partner"),
-                ("res_id", "in", child_ids),
-            ]
-
-            return expression.OR([base_domain, child_domain])
-
-        return base_domain
+    return base_domain
