@@ -67,6 +67,19 @@ class ResPartner(models.Model):
         domain="[('model', '=', 'res.partner')]"
     )
 
+    has_message = fields.Boolean(
+        string='Has Message',
+        compute='_compute_has_message',
+        store=True,
+        recursive=True,  # Resolves the warning you saw earlier
+    )
+    
+    @api.depends('message_ids')  # You could add more deps as needed
+    def _compute_has_message(self):
+        for partner in self:
+            message_domain = partner._message_fetch_domain()
+            partner.has_message = bool(self.env['mail.message'].search_count(message_domain))
+
     @api.depends('child_ids.message_ids')
     def _compute_message_ids(self):
         for partner in self:
