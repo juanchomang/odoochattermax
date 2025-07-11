@@ -30,13 +30,20 @@ sorted(set(dir(env['res.partner'])))
 
 sorted(set(dir(env['odoo.addons.mail.models.mail_thread'])))
 
+MORE TESTING
+============
+odoo-bin shell
+
+partner = env['res.partner'].search([('is_company', '=', True)], limit=1)
+domain = partner._message_fetch_domain()
+env['mail.message'].search(domain).mapped('subject')
 
 """
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-# from odoo.addons.mail.models.mail_thread import MailThread
+from odoo.exceptions import UserError, ValidationError
+from odoo.addons.mail.models.mail_thread import MailThread
 from ..utils.logging import log_debug_message
 
 class ResPartner(models.Model):
@@ -47,20 +54,20 @@ class ResPartner(models.Model):
 
         log_debug_message(
             self.env,
-            message=f"[OdooChatterMax] _message_fetch_domain triggered for partner {self.id}",
+            message=f"[OdooChatterMax] _message_fetch_domain triggered for partner ID {self.id}",
             path='res.partner',
             func='_message_fetch_domain',
         )
 
-        # Dynamically fetch base method from MRO
-        base_domain = super(type(self), self)._message_fetch_domain(domain)
+        # Call the base method explicitly to avoid recursion
+        base_domain = MailThread._message_fetch_domain(self, domain)
 
         if self.is_company and self.child_ids:
             child_ids = self.child_ids.ids
 
             log_debug_message(
                 self.env,
-                message=f"[OdooChatterMax] Including chatter from child_ids: {child_ids}",
+                message=f"[OdooChatterMax] Adding children {child_ids} to domain",
                 path='res.partner',
                 func='_message_fetch_domain',
             )
@@ -69,7 +76,6 @@ class ResPartner(models.Model):
                 ("model", "=", "res.partner"),
                 ("res_id", "in", child_ids),
             ]
-
             return expression.OR([base_domain, child_domain])
 
         return base_domain
