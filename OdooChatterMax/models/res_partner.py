@@ -15,8 +15,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from OdooChatterMax.utils.logging import log_debug_message
-
+from ..utils.logging import log_debug_message
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
