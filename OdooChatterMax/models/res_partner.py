@@ -55,13 +55,19 @@ class ResPartner(models.Model):
 
     def _message_fetch_domain(self, domain=None):
         self.ensure_one()
-
         log_debug_message(
             self.env,
             message=f"[OdooChatterMax] _message_fetch_domain triggered for partner ID {self.id}",
             path='res.partner',
             func='_message_fetch_domain',
         )
+        partner_ids = [self.id]
+        if self.is_company and self.child_ids:
+            partner_ids += self.child_ids.ids
+        return expression.AND([
+            domain or [],
+            [('model', '=', self._name), ('res_id', 'in', partner_ids)]
+        ])
 
         # Walk MRO to get the *next* method (i.e. skip ResPartner)
         # for base in type(self).__mro__[1:]:
@@ -72,12 +78,6 @@ class ResPartner(models.Model):
         # else:
         #     raise AttributeError("_message_fetch_domain not found in MRO")
 
-        base_domain = MailThread.__dict__['_message_fetch_domain'](self, domain)
-
-        if self.is_company and self.child_ids:
-            base_domain = ['|'] + base_domain + [('res_id', 'in', self.child_ids.ids)]
-
-        return base_domain
 
 """
 class ResPartner(models.Model):
