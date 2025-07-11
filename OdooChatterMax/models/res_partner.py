@@ -24,7 +24,7 @@ class ResPartner(models.Model):
 
         self.ensure_one()
 
-        log_debug_message(env, "Reached stage 2 logic for ticket #123")
+        log_debug_message(self.env, "Reached stage 2 logic for ticket #123")
 
         raise UserError(f"Entered _message_get_domain for partner ID {self.env}")
 
