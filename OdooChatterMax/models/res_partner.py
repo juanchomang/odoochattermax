@@ -44,10 +44,32 @@ from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 # from odoo.addons.mail.models.mail_thread import MailThread
-from odoo.addons.mail.models.mail_thread import MailThread
+# from odoo.addons.mail.models.mail_thread import MailThread
 # from odoo.addons.mail.models.mail_thread import MailThreadMixin
 from ..utils.logging import log_debug_message
 
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    def _message_fetch_domain(self, domain=None):
+        self.ensure_one()
+
+        log_debug_message(
+            self.env,
+            message=f"[OdooChatterMax] _message_fetch_domain triggered for partner ID {self.id}",
+            path='res.partner',
+            func='_message_fetch_domain',
+        )
+
+        # Call the first ancestor's implementation
+        base_domain = super(ResPartner, self)._message_fetch_domain(domain)
+
+        if self.is_company and self.child_ids:
+            base_domain = ['|'] + base_domain + [('res_id', 'in', self.child_ids.ids)]
+
+        return base_domain
+
+"""
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
@@ -63,7 +85,7 @@ class ResPartner(models.Model):
 
         # Call the base method explicitly to avoid recursion
         # base_domain = MailThreadMixin._message_fetch_domain(self, domain)
-        base_domain = MailThread._message_fetch_domain(self, domain)
+        # base_domain = MailThread._message_fetch_domain(self, domain)
 
 
         if self.is_company and self.child_ids:
@@ -83,3 +105,4 @@ class ResPartner(models.Model):
             return expression.OR([base_domain, child_domain])
 
         return base_domain
+"""
