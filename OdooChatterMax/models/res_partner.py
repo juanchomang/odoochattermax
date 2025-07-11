@@ -17,33 +17,43 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from ..utils.logging import log_debug_message
 
-def _message_get_domain(self):
-    self.ensure_one()
+class ResPartner(models.Model):
+    _inherit = "res.partner"
 
-    log_debug_message(
-        self.env,
-        f"Entered _message_get_domain for partner ID {self.id}",
-        path='res.partner',
-        func='_message_get_domain'
-    )
-
-    base_domain = super()._message_get_domain()
-
-    if self.is_company and self.child_ids:
-        child_ids = self.child_ids.ids
+    def _message_get_domain(self):
+        """
+        Extend the domain for mail.messages to include chatter from related contacts
+        (child_ids) when the current partner is a company.
+        """
+        self.ensure_one()
 
         log_debug_message(
             self.env,
-            f"Including child_ids in domain for partner {self.id}: {child_ids}",
+            message=f"[OdooChatterMax] _message_get_domain triggered for partner ID {self.id}",
             path='res.partner',
-            func='_message_get_domain'
+            func='_message_get_domain',
         )
 
-        child_domain = [
-            ("model", "=", "res.partner"),
-            ("res_id", "in", child_ids),
-        ]
+        # Start with the default domain
+        base_domain = super()._message_get_domain()
 
-        return expression.OR([base_domain, child_domain])
+        # If the partner is a company and has children, include their messages
+        if self.is_company and self.child_ids:
+            child_ids = self.child_ids.ids
 
-    return base_domain
+            log_debug_message(
+                self.env,
+                message=f"[OdooChatterMax] Including child_ids in chatter: {child_ids}",
+                path='res.partner',
+                func='_message_get_domain',
+            )
+
+            child_domain = [
+                ("model", "=", "res.partner"),
+                ("res_id", "in", child_ids),
+            ]
+
+            # Combine base domain with child domain
+            return expression.OR([base_domain, child_domain])
+
+        return base_domain
